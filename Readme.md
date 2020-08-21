@@ -17,7 +17,7 @@
 `{"facebook_user": "YourFacebookEmail",
    "facebook_password": "YourFacebookPassword",
    "groupId": "thegroupid",
- ***REMOVED***`
+ }`
 * Add the Facebook login details for the account you want to use for the scraping in **./config/Config.json**
 * Add the group id of the group you want to scrape in the Config.json file
 * By default the output file is created in the ./Results folder and has the same name as the group

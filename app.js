@@ -7,7 +7,7 @@ const fs = require('fs');
 async function infiniteScroll(page,scrollDelay,groupName){
     let index = 0;
     let previousHeight;
-    let FileStream = fs.createWriteStream(`./Results/${settings.groupId***REMOVED***.csv`,{flags:'a'***REMOVED***);
+    let FileStream = fs.createWriteStream(`./Results/${settings.groupId}.csv`,{flags:'a'});
     FileStream.write(`groupid|groupName|profile_url|full_name\n`);
     try{
         while(true) {
@@ -20,28 +20,28 @@ async function infiniteScroll(page,scrollDelay,groupName){
                 //evaluate the <a> child of the handle -- this is the same as document.querySelector ...
                 let title = await profile.$eval('a', el => el.title)
                 let src = await profile.$eval('a', el => el.href);
-                //console.log(`${src***REMOVED*** ${title***REMOVED***`)
+                //console.log(`${src} ${title}`)
                 //Writes data to pipe delimited file
-                FileStream.write(`${settings.groupId***REMOVED***|${groupName***REMOVED***|${src.replace(/(\?).*$/,'')***REMOVED***|${title***REMOVED***\n`);
-            ***REMOVED***
+                FileStream.write(`${settings.groupId}|${groupName}|${src.replace(/(\?).*$/,'')}|${title}\n`);
+            }
             previousHeight = await page.evaluate('document.body.scrollHeight');
             await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
-            await page.waitForFunction(`document.body.scrollHeight > ${previousHeight***REMOVED***`);
+            await page.waitForFunction(`document.body.scrollHeight > ${previousHeight}`);
             await page.waitFor(scrollDelay);
-        ***REMOVED***
+        }
 
-    ***REMOVED***catch(e){
+    }catch(e){
         console.log(e);
-    ***REMOVED***
-***REMOVED***
+    }
+}
 
 (async () => {
-    const browser = await puppeteer.launch({userDataDir: "./site_data",headless:false***REMOVED***)
+    const browser = await puppeteer.launch({userDataDir: "./site_data",headless:false})
     const page = await browser.newPage()
     const navigationPromise = page.waitForNavigation()
     await page.goto('https://www.facebook.com/')
 
-    await page.setViewport({ width: 1536, height: 733 ***REMOVED***)
+    await page.setViewport({ width: 1536, height: 733 })
 
     await navigationPromise
     const loggedin = await page.$('div[role="search"') || null;
@@ -62,23 +62,23 @@ async function infiniteScroll(page,scrollDelay,groupName){
 
 
             await page.click('button[name="login"]');
-            await page.waitForNavigation({ waitUntil: 'networkidle0' ***REMOVED***)
+            await page.waitForNavigation({ waitUntil: 'networkidle0' })
             const askingFor2FACode = await page.$('input[id="approvals_code"') || null;
             if(askingFor2FACode){
                 console.log("Waiting for 2FA to be entered");
                 await page.waitFor(20000);
-            ***REMOVED***
+            }
 
-        ***REMOVED***catch(err){
+        }catch(err){
             console.log(err);
-        ***REMOVED***
-    ***REMOVED***else{
+        }
+    }else{
         console.log("Already logged in")
-    ***REMOVED***
+    }
 
     try {
-        await page.goto(`https://www.facebook.com/groups/${settings.groupId***REMOVED***/members`,{waitUntil: 'domcontentloaded'***REMOVED***);
-       // await page.waitForNavigation({ waitUntil: 'networkidle0' ***REMOVED***);
+        await page.goto(`https://www.facebook.com/groups/${settings.groupId}/members`,{waitUntil: 'domcontentloaded'});
+       // await page.waitForNavigation({ waitUntil: 'networkidle0' });
         await page.waitForSelector('a[href*="group_header"]')
         //Get the group name
         let groupName = await page.evaluate(el=> el.innerText,await page.$('a[href*="group_header"]'));
@@ -89,10 +89,10 @@ async function infiniteScroll(page,scrollDelay,groupName){
         //gets the member names by scrolling infinitely
         await infiniteScroll(page,10,groupName);
 
-    ***REMOVED***catch(err){
+    }catch(err){
         console.log(err);
-    ***REMOVED***
+    }
 
 
-***REMOVED***)()
+})()
 
