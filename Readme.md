@@ -17,14 +17,13 @@
 `{"facebook_user": "YourFacebookEmail",
    "facebook_password": "YourFacebookPassword",
    "groupId": "thegroupid",
-   "outputFile": "Result.csv"
  }`
 * Add the Facebook login details for the account you want to use for the scraping in **./config/Config.json**
 * Add the group id of the group you want to scrape in the Config.json file
-* The output filename can also be set in the Config.json file
-* By default the output file is created in the ./Results folder
+* By default the output file is created in the ./Results folder and has the same name as the group
 * To run the application run **node app.js**
 
 Note:
-The first time you run the application it may ask for you to do two factor authentication. If this happens just enter the code and say save browser and re-run the app.
+* The first time you run the application it may ask for you to do two factor authentication. If this happens you have 20 seconds to enter the code and click next before the scraper resumes.
+* It seems that facebook only produces the first 10000 members and then stop the scrolling. 
 
