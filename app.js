@@ -4,13 +4,15 @@ const fs = require('fs');
 
 
 //Handles the infinite scroll
-async function infiniteScroll(page,scrollDelay){
+async function infiniteScroll(page,scrollDelay,groupName){
     let index = 0;
     let previousHeight;
-    let FileStream = fs.createWriteStream(`./Results/${settings.outputFile***REMOVED***`,{flags:'a'***REMOVED***);
+    let FileStream = fs.createWriteStream(`./Results/${settings.groupId***REMOVED***.csv`,{flags:'a'***REMOVED***);
+    FileStream.write(`groupid|groupName|profile_url|full_name\n`);
     try{
         while(true) {
             //Gets the element handler
+            console.log(index);
             let profiles = await page.$$('div[id*="recently_joined"]');
             let newItems = profiles.slice(index);
             for (let profile of newItems) {
@@ -18,9 +20,9 @@ async function infiniteScroll(page,scrollDelay){
                 //evaluate the <a> child of the handle -- this is the same as document.querySelector ...
                 let title = await profile.$eval('a', el => el.title)
                 let src = await profile.$eval('a', el => el.href);
-                console.log(`${src***REMOVED*** ${title***REMOVED***`)
+                //console.log(`${src***REMOVED*** ${title***REMOVED***`)
                 //Writes data to pipe delimited file
-                FileStream.write(`${src***REMOVED***|${title***REMOVED***\n`);
+                FileStream.write(`${settings.groupId***REMOVED***|${groupName***REMOVED***|${src.replace(/(\?).*$/,'')***REMOVED***|${title***REMOVED***\n`);
             ***REMOVED***
             previousHeight = await page.evaluate('document.body.scrollHeight');
             await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
@@ -49,8 +51,9 @@ async function infiniteScroll(page,scrollDelay){
     if(loggedin === null) {
         console.log("logging in");
         try {
-            await page.waitForSelector('#email')
-            await page.type('#email', settings.facebook_user);
+
+            await page.waitForSelector('input[name="email"]')
+            await page.type('input[name="email"]', settings.facebook_user);
 
             await page.waitForSelector('#pass');
             await page.type('#pass', settings.facebook_password);
@@ -60,6 +63,11 @@ async function infiniteScroll(page,scrollDelay){
 
             await page.click('button[name="login"]');
             await page.waitForNavigation({ waitUntil: 'networkidle0' ***REMOVED***)
+            const askingFor2FACode = await page.$('input[id="approvals_code"') || null;
+            if(askingFor2FACode){
+                console.log("Waiting for 2FA to be entered");
+                await page.waitFor(20000);
+            ***REMOVED***
 
         ***REMOVED***catch(err){
             console.log(err);
@@ -71,19 +79,15 @@ async function infiniteScroll(page,scrollDelay){
     try {
         await page.goto(`https://www.facebook.com/groups/${settings.groupId***REMOVED***/members`,{waitUntil: 'domcontentloaded'***REMOVED***);
        // await page.waitForNavigation({ waitUntil: 'networkidle0' ***REMOVED***);
+        await page.waitForSelector('a[href*="group_header"]')
+        //Get the group name
+        let groupName = await page.evaluate(el=> el.innerText,await page.$('a[href*="group_header"]'));
+
+        //Wait fir the members list to show
         await page.waitForSelector('div[id*="recently_joined"]')
 
-        //gets the handles
-        let profiles =await  page.$$('div[id*="recently_joined"]');
-
-        await infiniteScroll(page,10);
-
-        // for(let profile of profiles){
-        //     //evaluate the <a> child of the handle
-        //     let title = await profile.$eval('a',el=>el.title)
-        //     let src =await profile.$eval('a',el=>el.href);
-        //     console.log(`${src***REMOVED*** ${title***REMOVED***`)
-        // ***REMOVED***
+        //gets the member names by scrolling infinitely
+        await infiniteScroll(page,10,groupName);
 
     ***REMOVED***catch(err){
         console.log(err);
