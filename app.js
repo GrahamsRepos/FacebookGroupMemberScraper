@@ -4,6 +4,7 @@ const fs = require('fs');
 
 
 //Handles the infinite scroll
+
 async function infiniteScroll(page,scrollDelay,groupName,FileStream){
     FileStream.write(`groupid|groupName|profile_url|full_name|info1|info2\n`);
     let previousHeight;
@@ -33,9 +34,6 @@ async function infiniteScroll(page,scrollDelay,groupName,FileStream){
             }
 
 
-
-
-
             previousHeight = await page.evaluate('document.body.scrollHeight');
             await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
             await page.waitForFunction(`document.body.scrollHeight > ${previousHeight}`);
@@ -54,6 +52,7 @@ async function infiniteScroll(page,scrollDelay,groupName,FileStream){
     await page.goto('https://www.facebook.com/')
 
     await page.setViewport({ width: 2000, height: 900 })
+
 
     await navigationPromise
     const loggedin = await page.$('div[role="search"') || null;
@@ -74,11 +73,10 @@ async function infiniteScroll(page,scrollDelay,groupName,FileStream){
 
 
             await page.click('button[name="login"]');
-
             //Wait for the page to complete loading , if just check is not done the page.goto below doesn't work
             await page.waitForNavigation({ waitUntil: 'networkidle0' })
 
-            //Check if we are at the page where the sms code needs to be entered , if so the scraper waits 20 seconds for the user to do that
+
             const askingFor2FACode = await page.$('input[id="approvals_code"') || null;
             if(askingFor2FACode){
                 console.log("Waiting for 2FA to be entered");
