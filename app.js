@@ -8,13 +8,14 @@ const fs = require('fs');
 async function infiniteScroll(page,scrollDelay,groupName,FileStream){
     FileStream.write(`groupid|groupName|profile_url|full_name|info1|info2\n`);
     let previousHeight;
+    let retryNumber = 0;
     try{
         let previousLength = 0;
         let total = 0;
         while(true) {
             //Gets the element handler
             console.log(`${total} ${previousLength}`);
-            let profiles = await page.$$('div[id*="recently_joined"]');
+            let profiles = await page.$x('//div[@data-name="GroupProfileGridItem"]');
             let newItems = profiles.slice(previousLength)
             for (let profile of newItems) {
                 previousLength+=1;
@@ -33,11 +34,23 @@ async function infiniteScroll(page,scrollDelay,groupName,FileStream){
                 previousLength = 0;
             }
 
+            try {
+                previousHeight = await page.evaluate('document.body.scrollHeight');
+                await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
+                await page.waitForFunction(`document.body.scrollHeight > ${previousHeight}`);
+                await page.waitFor(scrollDelay);
+            }catch(e){
+                //This is here so that the system retries if there is a momentary connection error
+                console.log(e);
+                console.log("waiting for 5 seconds");
+                await page.waitFor(5000);
+                await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
+                await page.waitForFunction(`document.body.scrollHeight > ${previousHeight}`);
+                await page.waitFor(scrollDelay);
+                continue;
 
-            previousHeight = await page.evaluate('document.body.scrollHeight');
-            await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
-            await page.waitForFunction(`document.body.scrollHeight > ${previousHeight}`);
-            await page.waitFor(scrollDelay);
+
+            }
         }
 
     }catch(e){
