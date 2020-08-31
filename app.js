@@ -10,16 +10,21 @@ async function infiniteScroll(page,scrollDelay,groupName,FileStream){
     let previousHeight;
     let retryNumber = 0;
     try{
-        let previousLength = 0;
-        let total = 0;
+        let previousTotal = 0;
         while(true) {
-            //Gets the element handler
-            console.log(`${total} ${previousLength}`);
+
+            //After three retries the scroll has probably reached it's end ...
+            if(retryNumber>=5){
+                break;
+            }
+            console.log(`${previousTotal}`);
+
+            //The component containing the name and profile link has data-name GroupProfileGridItem and cane grabbed using xpath
             let profiles = await page.$x('//div[@data-name="GroupProfileGridItem"]');
-            let newItems = profiles.slice(previousLength)
+            let newItems = previousTotal===0?profiles:profiles.slice(previousTotal);
+            console.log(`Profiles: ${profiles.length} , New Items:${newItems.length}`)
             for (let profile of newItems) {
-                previousLength+=1;
-                total += 1;
+                previousTotal+=1;
                 //evaluate the <a> child of the handle -- this is the same as document.querySelector ...
                 let title = await profile.$eval('a', el => el.title)
                 let src = await profile.$eval('a', el => el.href);
@@ -30,9 +35,7 @@ async function infiniteScroll(page,scrollDelay,groupName,FileStream){
                 //Writes data to pipe delimited file
                 FileStream.write(`${settings.groupId}|${groupName}|${src.replace(/(\?).*$/,'')}|${title}|${infoTextArray[0]}|${infoTextArray[1]}\n`);
             }
-            if(newItems.length === 0){
-                previousLength = 0;
-            }
+            //In certain cases facebook does actually allow for the scraping of more than 10000 names, this resets the counter because after 100000 a new series of divs are produced
 
             try {
                 previousHeight = await page.evaluate('document.body.scrollHeight');
@@ -47,9 +50,11 @@ async function infiniteScroll(page,scrollDelay,groupName,FileStream){
                 await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
                 await page.waitForFunction(`document.body.scrollHeight > ${previousHeight}`);
                 await page.waitFor(scrollDelay);
-                continue;
-
-
+                retryNumber+=1;
+            }
+            if (newItems.length === 0){
+                console.log("Done");
+                break;
             }
         }
 

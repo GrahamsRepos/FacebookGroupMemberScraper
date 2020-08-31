@@ -25,5 +25,5 @@
 
 Note:
 * The first time you run the application it may ask for you to do two factor authentication. If this happens you have 20 seconds to enter the code and click next before the scraper resumes.
-* It seems that facebook only produces the first 10000 members and then stop the scrolling. 
+* It seems that facebook only produces the first 10000 members and then doesn't scroll any further which is ok for now. 
 
