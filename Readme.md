@@ -20,6 +20,7 @@
  }`
 * Add the Facebook login details for the account you want to use for the scraping in **./config/Config.json**
 * Add the group id of the group you want to scrape in the Config.json file
+* I have added a bash script called MakeConfig.sh that will automatically generate the config file for you
 * By default the output file is created in the ./Results folder and has the same name as the group
 * To run the application run **node app.js**
 
