@@ -28,3 +28,5 @@ Note:
 * The first time you run the application it may ask for you to do two factor authentication. If this happens you have 20 seconds to enter the code and click next before the scraper resumes.
 * It seems that facebook only produces the first 10000 members and then doesn't scroll any further which is ok for now. 
 
+!Important: Facebook hs recently switched to a new look that uses different css selectors. This means that the scraper will only work if the profile used has the classic look enabled. I might in the future release a new version that's able to scrape the new look facebook pages.
+
